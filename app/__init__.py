@@ -71,7 +71,8 @@ def load_error_multiplier():
             total_delay += packet.header[0]
         avg_delay = total_delay/n_packets
         return avg_delay/effective_delay_budget
-    except:
+    except Exception as e:
+        print("Error @ load_multiplier : %s" % str(e))
         return 1
 
 def is_transcoding_error(noise_level):
@@ -158,7 +159,8 @@ class NetworkDataManager:
         self.netbuffer_path = [NETWORK_HOME, netbuffer_host_dir]
         try:
             os.mkdir(Path(self.netbuffer_path))
-        except:
+        except Exception as e:
+            print("Error @ data_manager_init : %s" % str(e))
             pass
         self.netbuffers = {}
     def register_new_netbuffer(self, netbuffer_type):
@@ -179,7 +181,8 @@ class NetworkDataManager:
                 return data
             else:
                 return None
-        except:
+        except Exception as e:
+            print("Error @ read_net_buffer : %s" % str(e))
             return None
 
 def log(sessionId, request, response):
@@ -246,7 +249,8 @@ def SortPackets():
         Scheduler.write_netbuffer("SortedPackets", SortedPackets)
         log(sessionId, "SORTED_PACKET", "1 packet with id: %s was sorted (%s bits)" % (packet.header[5], packet.header[8]))
         return "%s: %s" % (201, "Packet was sorted (%s bits)" % packet.header[8])
-    except:
+    except Exception as e:
+        print("Error @ sorter : %s" % str(e))
         return "%s: %s" % (404, "No packet found")
 
 # simulation agent firing mechanism for validating packet integrity
@@ -294,7 +298,8 @@ def ProfilePackets():
             return queue(packet)
         else:
             return retransmit(packet)
-    except:
+    except Exception as e:
+        print("Error @ profiler : %s" % str(e))
         return "%s: %s" % (404, "No packet found")
 
 # simulation agent firing mechanism for transcoding IP packets to MAC packets
@@ -340,7 +345,8 @@ def UERegistration(n_packets):
     ip_address = request.remote_addr
     try:
         session = UESession(ip_address, int(n_packets))
-    except:
+    except Exception as e:
+        print("Error @ create_session : %s" % str(e))
         return "%s: %s" % (400, "Error creating session: packet_size not specified")
     UERegister = AirInterface.read_netbuffer("UERegister")
     if UERegister:
