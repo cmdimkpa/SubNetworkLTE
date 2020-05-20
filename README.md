@@ -1,2 +1,2 @@
-# heroku-python-api-primer
-Heroku Python API Primer
+# LTE MAC Layer Simulator
+LTE-Network-as-Web-Service (MAC Layer)
