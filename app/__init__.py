@@ -159,7 +159,7 @@ def UESession(ip_address, n_packets):
 class NetworkDataManager:
     global HOST_NETWORK
     def __init__(self, netbuffer_host_dir):
-        self.netbuffer_path = Path([NETWORK_HOME, netbuffer_host_dir]);
+        self.netbuffer_path = [Path([NETWORK_HOME, netbuffer_host_dir])];
         self.netbuffers = {}
     def register_new_netbuffer(self, netbuffer_type):
         self.netbuffers[netbuffer_type] = Path(self.netbuffer_path+["%s.netbuffer" % netbuffer_type])
