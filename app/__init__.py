@@ -25,12 +25,8 @@ CORS(app)
 server_host = "localhost"
 server_port = 5000
 
-NETWORK_HOME = os.getcwd()
-if "\\" in NETWORK_HOME:
-    slash = "\\"
-else:
-    slash = "/"
-NETWORK_HOME+=slash
+HOST_NETWORK = {} # In-memory Network
+slash = "/"
 
 #-------------- LTE Network Constants ------
 
@@ -51,7 +47,13 @@ max_IP_packet_size = 2000
 #-------------- Base Classes --------------
 
 def Path(path_array):
-    return slash.join(path_array)
+    global HOST_NETWORK
+    location = "";
+    for level in path_array:
+        location+="%s%s" % (slash, level);
+    if (location not in HOST_NETWORK):
+        HOST_NETWORK[location] = None;
+    return location
 
 def now(): return datetime.datetime.today()
 
@@ -154,35 +156,25 @@ def UESession(ip_address, n_packets):
     return [ip_address, session_time, sessionId, n_packets, duplicate([IP_Packet(sessionId, packet_size(), ip_address, session_time).loggable() for i in range(n_packets)], packet_duplication)]
 
 class NetworkDataManager:
-    # this class manages the data I/O in the Network
+    global HOST_NETWORK
     def __init__(self, netbuffer_host_dir):
-        self.netbuffer_path = [NETWORK_HOME, netbuffer_host_dir]
-        try:
-            os.mkdir(Path(self.netbuffer_path))
-        except Exception as e:
-            print("Error @ data_manager_init : %s" % str(e))
-            pass
+        self.netbuffer_path = Path([NETWORK_HOME, netbuffer_host_dir]);
         self.netbuffers = {}
     def register_new_netbuffer(self, netbuffer_type):
         self.netbuffers[netbuffer_type] = Path(self.netbuffer_path+["%s.netbuffer" % netbuffer_type])
     def write_netbuffer(self, netbuffer_type, data):
         if netbuffer_type not in self.netbuffers:
             self.register_new_netbuffer(netbuffer_type)
-        p = open(self.netbuffers[netbuffer_type], "wb+")
-        p.write(pickle.dumps(data))
-        p.close()
+        HOST_NETWORK[self.netbuffers[netbuffer_type]] = pickle.dumps(data);
         return data
     def read_netbuffer(self, netbuffer_type):
         try:
             if netbuffer_type in self.netbuffers:
-                p = open(self.netbuffers[netbuffer_type], "rb+")
-                data = pickle.loads(p.read())
-                p.close()
+                data = pickle.loads(HOST_NETWORK[self.netbuffers[netbuffer_type]])
                 return data
             else:
                 return None
-        except Exception as e:
-            print("Error @ read_net_buffer : %s" % str(e))
+        except:
             return None
 
 def log(sessionId, request, response):
