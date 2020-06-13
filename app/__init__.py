@@ -26,6 +26,7 @@ server_host = "localhost"
 server_port = 5000
 
 HOST_NETWORK = {} # In-memory Network
+NETWORK_HOME = "/home/network"
 slash = "/"
 
 #-------------- LTE Network Constants ------
